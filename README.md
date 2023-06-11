@@ -26,3 +26,7 @@ The generated http.Handler creates an API with the following conventions:
 1. All requests will be POSTs at the root
 2. The query param `name` will determine which `NameHandler` will handle the http.Request
 3. Passing in an unknown name will return all possible `name`s along with their json request/response schemas.
+
+You can see an example of this in the examples/bookapi folder
+
+https://github.com/stuartaroth/namepoints/tree/master/examples/bookapi
