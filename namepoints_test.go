@@ -32,16 +32,16 @@ func (t testNameHandler) GetResponse(r *http.Request) (interface{}, error) {
 }
 
 func TestHappyPath(t *testing.T) {
-	nameHandlers := []NameHandler{testNameHandler{"test"}}
-	_, err := NewHandler(nameHandlers)
+	nameHandlers := []Namepoint{testNameHandler{"test"}}
+	_, err := NewHttpHandler(nameHandlers)
 	if err != nil {
 		log.Fatalf("Error on HappyPath %s", err.Error())
 	}
 }
 
 func TestNameAsEmptyString(t *testing.T) {
-	nameHandlers := []NameHandler{testNameHandler{""}}
-	handler, err := NewHandler(nameHandlers)
+	nameHandlers := []Namepoint{testNameHandler{""}}
+	handler, err := NewHttpHandler(nameHandlers)
 
 	if handler != nil {
 		log.Fatalf("Handler should be nil")
@@ -51,17 +51,17 @@ func TestNameAsEmptyString(t *testing.T) {
 		log.Fatalf("Error should not be nil")
 	}
 
-	if err.Error() != "NameHandler Name() should not be empty string" {
+	if err.Error() != "Namepoint Name() should not be empty string" {
 		log.Fatalf("Error string is not expected")
 	}
 }
 
 func TestDuplicateName(t *testing.T) {
-	nameHandlers := []NameHandler{
+	nameHandlers := []Namepoint{
 		testNameHandler{"test"},
 		testNameHandler{"test"},
 	}
-	handler, err := NewHandler(nameHandlers)
+	handler, err := NewHttpHandler(nameHandlers)
 
 	if handler != nil {
 		log.Fatalf("Handler should be nil")
@@ -71,7 +71,7 @@ func TestDuplicateName(t *testing.T) {
 		log.Fatalf("Error should not be nil")
 	}
 
-	if err.Error() != "NameHandler Name() should be unique. Found duplicate: test" {
+	if err.Error() != "Namepoint Name() should be unique. Found duplicate: test" {
 		log.Fatalf("Error string is not expected")
 	}
 }

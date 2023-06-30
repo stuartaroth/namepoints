@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-type NameHandler interface {
+type Namepoint interface {
 	Name() string
 	UpdatesData() bool
 	Request() *jsonschema.Schema
@@ -16,24 +16,24 @@ type NameHandler interface {
 	GetResponse(r *http.Request) (interface{}, error)
 }
 
-func NewHandler(handlers []NameHandler) (http.Handler, error) {
-	nameHandlers := make(map[string]NameHandler)
+func NewHttpHandler(points []Namepoint) (http.Handler, error) {
+	pointsMap := make(map[string]Namepoint)
 	schemas := make(map[string]interface{})
 
-	for i := 0; i < len(handlers); i++ {
-		handler := handlers[i]
+	for i := 0; i < len(points); i++ {
+		handler := points[i]
 		name := handler.Name()
 
 		if name == "" {
-			return nil, errors.New("NameHandler Name() should not be empty string")
+			return nil, errors.New("Namepoint Name() should not be empty string")
 		}
 
-		_, exists := nameHandlers[name]
+		_, exists := pointsMap[name]
 		if exists {
-			return nil, errors.New(fmt.Sprintf("NameHandler Name() should be unique. Found duplicate: %s", name))
+			return nil, errors.New(fmt.Sprintf("Namepoint Name() should be unique. Found duplicate: %s", name))
 		}
 
-		nameHandlers[name] = handler
+		pointsMap[name] = handler
 		schemas[name] = map[string]interface{}{
 			"updatesData":    handler.UpdatesData(),
 			"requestSchema":  handler.Request(),
@@ -46,9 +46,7 @@ func NewHandler(handlers []NameHandler) (http.Handler, error) {
 		return nil, err
 	}
 
-	genericErrorMessage := map[string]interface{}{
-		"error": "Error",
-	}
+	genericErrorMessage := npError{"Something went wrong"}
 
 	genericErrorMessageBits, err := json.Marshal(genericErrorMessage)
 	if err != nil {
@@ -56,15 +54,19 @@ func NewHandler(handlers []NameHandler) (http.Handler, error) {
 	}
 
 	return namepointsHandler{
-		nameHandlers:            nameHandlers,
+		pointsMap:               pointsMap,
 		schemas:                 schemas,
 		schemaBits:              schemaBits,
 		genericErrorMessageBits: genericErrorMessageBits,
 	}, nil
 }
 
+type npError struct {
+	Error string `json:"error"`
+}
+
 type namepointsHandler struct {
-	nameHandlers            map[string]NameHandler
+	pointsMap               map[string]Namepoint
 	schemas                 map[string]interface{}
 	schemaBits              []byte
 	genericErrorMessageBits []byte
@@ -80,7 +82,7 @@ func (npHandler namepointsHandler) ServeHTTP(w http.ResponseWriter, r *http.Requ
 
 	name := r.URL.Query().Get("name")
 
-	nameHandler, exists := npHandler.nameHandlers[name]
+	nameHandler, exists := npHandler.pointsMap[name]
 	if exists {
 		response, err := nameHandler.GetResponse(r)
 		if err != nil {
@@ -112,9 +114,7 @@ func (npHandler namepointsHandler) ServeHTTP(w http.ResponseWriter, r *http.Requ
 func writeError(w http.ResponseWriter, err error, npHandler namepointsHandler) {
 	w.WriteHeader(500)
 
-	errorMessage := map[string]interface{}{
-		"error": err.Error(),
-	}
+	errorMessage := npError{err.Error()}
 
 	bits, err := json.Marshal(errorMessage)
 	if err != nil {
