@@ -33,7 +33,7 @@ func (t testNameHandler) GetResponse(r *http.Request) (interface{}, error) {
 
 func TestHappyPath(t *testing.T) {
 	nameHandlers := []Namepoint{testNameHandler{"test"}}
-	_, err := NewHttpHandler(nameHandlers)
+	_, err := NewHttpHandler(nameHandlers, map[string]string{})
 	if err != nil {
 		log.Fatalf("Error on HappyPath %s", err.Error())
 	}
@@ -41,7 +41,7 @@ func TestHappyPath(t *testing.T) {
 
 func TestNameAsEmptyString(t *testing.T) {
 	nameHandlers := []Namepoint{testNameHandler{""}}
-	handler, err := NewHttpHandler(nameHandlers)
+	handler, err := NewHttpHandler(nameHandlers, map[string]string{})
 
 	if handler != nil {
 		log.Fatalf("Handler should be nil")
@@ -61,7 +61,7 @@ func TestDuplicateName(t *testing.T) {
 		testNameHandler{"test"},
 		testNameHandler{"test"},
 	}
-	handler, err := NewHttpHandler(nameHandlers)
+	handler, err := NewHttpHandler(nameHandlers, map[string]string{})
 
 	if handler != nil {
 		log.Fatalf("Handler should be nil")

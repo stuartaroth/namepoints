@@ -5,7 +5,7 @@ This is a small library that enables you to quickly create named endpoint functi
 There is a single public function and a single public interface to use.
 
 ```go
-func NewHttpHandler(points []Namepoint) (http.Handler, error)
+func NewHttpHandler(points []Namepoint, headers map[string]string) (http.Handler, error)
 ```
 This creates a http.Handler for use in the standard library.
 

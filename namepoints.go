@@ -16,7 +16,7 @@ type Namepoint interface {
 	GetResponse(r *http.Request) (interface{}, error)
 }
 
-func NewHttpHandler(points []Namepoint) (http.Handler, error) {
+func NewHttpHandler(points []Namepoint, headers map[string]string) (http.Handler, error) {
 	pointsMap := make(map[string]Namepoint)
 	schemas := make(map[string]interface{})
 
@@ -58,6 +58,7 @@ func NewHttpHandler(points []Namepoint) (http.Handler, error) {
 		schemas:                 schemas,
 		schemaBits:              schemaBits,
 		genericErrorMessageBits: genericErrorMessageBits,
+		headers:                 headers,
 	}, nil
 }
 
@@ -70,10 +71,15 @@ type namepointsHandler struct {
 	schemas                 map[string]interface{}
 	schemaBits              []byte
 	genericErrorMessageBits []byte
+	headers                 map[string]string
 }
 
 func (npHandler namepointsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+
+	for key, value := range npHandler.headers {
+		w.Header().Set(key, value)
+	}
 
 	if r.Method != "POST" {
 		writeError(w, errors.New("requests must be POST"), npHandler)

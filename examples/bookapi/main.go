@@ -31,7 +31,7 @@ func main() {
 	var nameHandlers []namepoints.Namepoint
 	nameHandlers = append(nameHandlers, getAllBooksHandler{&myEnv})
 	nameHandlers = append(nameHandlers, addBookHandler{&myEnv})
-	httpHandler, err := namepoints.NewHttpHandler(nameHandlers)
+	httpHandler, err := namepoints.NewHttpHandler(nameHandlers, map[string]string{})
 	if err != nil {
 		log.Fatal(err)
 		return
